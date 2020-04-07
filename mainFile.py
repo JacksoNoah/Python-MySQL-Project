@@ -66,18 +66,24 @@ def fill_relations(mydb, df):
     spokenLangColumns = ['movieID', 'spokenLangID', 'spokenLangName']
     spokenLangDF = pd.DataFrame(index=indexArray, columns=spokenLangColumns)
 
-    get_data(df, genreDF, 'genres')
-    get_data(df, keywordDF, 'keywords')
-    get_data(df, prodCompaniesDF, 'production_companies')
-    get_data(df, prodCountriesDF, 'production_countries')
-    get_data(df, spokenLangDF, 'spoken_languages')
+    dfArray = []
+    dfArray.append(genreDF)
+    dfArray.append(keywordDF)
+    dfArray.append(prodCompaniesDF)
+    dfArray.append(prodCountriesDF)
+    dfArray.append(spokenLangDF)
+
+    get_data(df, genreDF, 'genres', df['id'])
+    get_data(df, keywordDF, 'keywords', df['id'])
+    get_data(df, prodCompaniesDF, 'production_companies', df['id'])
+    get_data(df, prodCountriesDF, 'production_countries', df['id'])
+    get_data(df, spokenLangDF, 'spoken_languages', df['id'])
 
     genreDF.dropna(how='all', inplace=True)
     keywordDF.dropna(how='all', inplace=True)
     prodCompaniesDF.dropna(how='all', inplace=True)
     prodCountriesDF.dropna(how='all', inplace=True)
     spokenLangDF.dropna(how='all', inplace=True)
-    # newDF.dropna(subset=['movieID', colOneName, colTwoName])
 
     print(genreDF)
     print(keywordDF)
@@ -90,16 +96,10 @@ def fill_relations(mydb, df):
     return
 
 
-''' dfArray = []
-    dfArray.append(genreDF)
-    dfArray.append(keywordDF)
-    dfArray.append(prodCompaniesDF)
-    dfArray.append(prodCountriesDF)
-    dfArray.append(spokenLangDF)'''
 
 
 # parses/extracts data of a specific attribute, "attr", of the DataFrame "df"
-def get_data(df, newDF, attr):
+def get_data(df, newDF, attr, movieIds):
     # get column names of data frame being inserted into
     colOneName = newDF.columns[1]
     colTwoName = newDF.columns[2]
@@ -135,6 +135,7 @@ def get_data(df, newDF, attr):
             # if char is a space then we have reached end of word then set id attribute in newDF
             if randData[j] == "," and (commaCount % 2) == 1:
                 # print("id: %s\n" % randDataId)
+                newDF['movieID'].iloc[count] = movieIds[count]
                 newDF[colOneName].iloc[count] = randDataId
                 commaCount += 1
                 randDataId = ""  # used to store id attribute from data row i
@@ -145,6 +146,7 @@ def get_data(df, newDF, attr):
             elif randData[j] == "," and (commaCount % 2) == 0:
 
                 if not randDataName.isspace() and randDataName != "":
+                    newDF['movieID'].iloc[count] = movieIds[count]
                     # print("name: %s\n" % randDataName)
                     newDF[colTwoName].iloc[count] = randDataName
                 commaCount += 1
