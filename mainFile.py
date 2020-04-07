@@ -89,7 +89,7 @@ def get_data(df, newDF, attr):
 
         evenOddFlag = 0  # is 0 when char is odd numbered space, and 1 when char is even space in row
         dataFlag = 0  # if 1 then data element is id, or newDF.columns[1], if 2 then newDF.columns[2]
-        spaceCount = 0  # keep track of which space
+        commaCount = 0  # keep track of which space
 
         randDataName = ""  # used to store name attribute from data row i
         randDataId = ""  # used to store id attribute from data row i
@@ -106,7 +106,7 @@ def get_data(df, newDF, attr):
         print("randData: %s\n" % randData)
         randLength = len(randData)
         # print(newDF.columns[0])
-        spaceCount = 0
+        commaCount = 0
 
         j = 1
         # while j is less than length of row
@@ -117,18 +117,18 @@ def get_data(df, newDF, attr):
             count += 1
 
             # if char is a space then we have reached end of word then set id attribute in newDF
-            if randData[j] == "," and (spaceCount % 2) == 1:
+            if randData[j] == "," and (commaCount % 2) == 1:
                 newDF[colOneName] = randDataId
-                spaceCount += 1
+                commaCount += 1
                 randDataId = ""  # used to store id attribute from data row i
                 evenOddFlag = 0
 
                 # print("breaking\n")
 
             # if char is a space then we have reached end of word then set name attribute in newDF
-            elif randData[j] == "," and (spaceCount % 2) == 0:
+            elif randData[j] == "," and (commaCount % 2) == 0:
                 newDF[colTwoName] = randDataName
-                spaceCount += 1
+                commaCount += 1
                 randDataName = ""  # used to store name attribute from data row i
                 evenOddFlag = 1
 
