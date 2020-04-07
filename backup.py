@@ -18,8 +18,7 @@ def create_relations():
 
     print(mydb)
 
-    df = pd.read_csv('/home/noahj734/Desktop/PycharmProjects/Databases/DBHW5/tmdb_5000_movies.csv/')
-
+    df = pd.read_csv('/home/noahj734/Desktop/PycharmProjects/Databases/tmdb_5000_movies.csv')
     print(df.shape)
 
     # print(df.columns.values)     # example how to print column names
@@ -44,46 +43,76 @@ def create_relations():
 
 # Fills relations with data provided
 def fill_relations(mydb, df):
-    idArray = []
-    nameArray = []
-    """ i = 0
-     while i < df.shape[0]:
+    # setting up all data frames for data parsing/extraction
+    genreColumns = ['movieID', 'genreID', 'genreName']
+    genreDF = pd.DataFrame(columns=genreColumns)
 
-         rand = df['genres'].iloc[i]
-         rand = ''.join(c for c in rand if c not in '(){}<>,":')
-         print(rand)
+    keywordColumns = ['movieID', 'keywordID', 'keywordName']
+    keywordDF = pd.DataFrame(columns=keywordColumns)
 
+    prodCompaniesColumns = ['movieID', 'prodCompanyID', 'prodCompanyName']
+    prodCompaniesDF = pd.DataFrame(columns=prodCompaniesColumns)
 
-         i += 1
-       """
-    randId = ""
-    rand = df['genres'].iloc[0]
-    rand = ''.join(c for c in rand if c not in '(){}<>,":')
-    print(rand)
-    randLength = len(rand)
-    print("len(rand): %d\n" % randLength)
-    spaceCount = 0
+    prodCountriesColumns = ['movieID', 'prodCountryID', 'prodCountryName']
+    prodCountriesDF = pd.DataFrame(columns=prodCountriesColumns)
 
-    j = 4
+    spokenLangColumns = ['movieID', 'spokenLangID', 'spokenLangName']
+    spokenLangDF = pd.DataFrame(columns=spokenLangColumns)
 
-    while j < randLength:
-        if rand[j] == " ":
-            print("breaking\n")
-            break
+    dfArray = []
+    dfArray.append(genreDF)
+    dfArray.append(keywordDF)
+    dfArray.append(prodCompaniesDF)
+    dfArray.append(prodCountriesDF)
+    dfArray.append(spokenLangDF)
 
-        else:
-            print("char: %c\n" % rand[j])
-            randId += rand[j]
-            j += 1
+    # get_data(df, genreDF, 'genres')
+    # get_data(df, genreDF, 'keywords')
+    # get_data(df, genreDF, 'production_companies')
+    # get_data(df, genreDF, 'production_countries')
+    get_data(df, genreDF, 'spoken_languages')
 
-    print(randId)
+    # print(df.iloc[0])
     sqlFormula = "INSERT INTO Genre ( id, name) VALUES ( %s, %s)"
 
     return
 
 
-create_relations()
+# parses/extracts data of a specific attribute, "attr", of the DataFrame "df"
+def get_data(df, newDF, attr):
+    i = 0
+    while i < df.shape[0]:
 
+        evenOddFlag = 0  # if 0, on odd space, on even space in rows data
+
+        randDataName = ""
+        randDataId = ""
+        randData = df[attr].iloc[i]
+        randData = ''.join(c for c in randData if c not in '(){}<>,":[]')
+        # print("randData: %s\n" % randData)
+        randLength = len(randData)
+        print(newDF.columns[0])
+        spaceCount = 0
+
+        j = 0
+        # while j is less than length of row
+        while j < randLength:
+            if randData[j] == " ":
+
+                # print("breaking\n")
+                break
+
+            else:
+                # print("char: %c\n" % randData[j])
+                randDataId += randData[j]
+                j += 1
+        # print("randDataId: %s\n" % randDataId)
+        i += 1
+
+    print("i: %d\n" % i)
+
+
+create_relations()
 
 '''
 ##

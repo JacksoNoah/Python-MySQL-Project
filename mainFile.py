@@ -66,13 +66,13 @@ def fill_relations(mydb, df):
     dfArray.append(prodCountriesDF)
     dfArray.append(spokenLangDF)
 
-    # get_data(df, genreDF, 'genres')
+    get_data(df, genreDF, 'genres')
     # get_data(df, genreDF, 'keywords')
     # get_data(df, genreDF, 'production_companies')
     # get_data(df, genreDF, 'production_countries')
-    get_data(df, genreDF, 'spoken_languages')
+    # get_data(df, genreDF, 'spoken_languages')
 
-    # print(df.iloc[0])
+    # print(df['genres'].iloc[0])
     sqlFormula = "INSERT INTO Genre ( id, name) VALUES ( %s, %s)"
 
     return
@@ -83,33 +83,57 @@ def get_data(df, newDF, attr):
     i = 0
     while i < df.shape[0]:
 
-        evenOddFlag = 0  # if 0, on odd space, on even space in rows data
+        evenOddFlag = 0  # is 0 when char is odd numbered space, and 1 when char is even space in row
+        dataFlag = 0  # if 1 then data element is id, or newDF.columns[1], if 2 then newDF.columns[2]
+        spaceCount = 0  # keep track of which space
 
-        randDataName = ""
-        randDataId = ""
+        randDataName = ""  # used to store name attribute from data row i
+        randDataId = ""  # used to store id attribute from data row i
+
+        # get data from row i
         randData = df[attr].iloc[i]
+
+        # remove all chars in '(){}<>,":[]' from the rows data to help with parsing
         randData = ''.join(c for c in randData if c not in '(){}<>,":[]')
-        # print("randData: %s\n" % randData)
+
+        print("randData: %s\n" % randData)
         randLength = len(randData)
-        print(newDF.columns[0])
+        # print(newDF.columns[0])
         spaceCount = 0
 
         j = 0
         # while j is less than length of row
         while j < randLength:
-            if randData[j] == " ":
-
+            colOneName = newDF.columns[1]
+            colTwoName = newDF.columns[2]
+            # if char is a space then we have reached end of word then set id attribute in newDF
+            if randData[j] == " " and spaceCount == 0:
+                newDF[colOneName] = randDataId
+                spaceCount += 1
+                return
                 # print("breaking\n")
-                break
 
-            else:
+            # if char is a space then we have reached end of word then set name attribute in newDF
+            elif randData[j] == " " and spaceCount == 1:
+                newDF[colTwoName] = randDataName
+                spaceCount += 1
+                # print("breaking\n")
+
+            # if char is first space reached in row its id attributes data
+            elif randData[j] != " " and spaceCount == 0:
                 # print("char: %c\n" % randData[j])
                 randDataId += randData[j]
-                j += 1
-        # print("randDataId: %s\n" % randDataId)
+
+            # if char is second space reached in row its name attributes data
+            elif randData[j] != " " and spaceCount == 1:
+                randDataName += randData[j]
+
+            j += 1
+
+        print("randDataId: %s\nrandDataName: %s\n" % (randDataId, randDataName))
         i += 1
 
-    print("i: %d\n" % i)
+    # print("i: %d\n" % i)
 
 
 create_relations()
