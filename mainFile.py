@@ -5,6 +5,7 @@
 
 import mysql.connector
 import pandas as pd
+import datetime
 
 
 # creates relations in mySQL workbench for the supplied data
@@ -43,34 +44,36 @@ def create_relations():
 
 # Fills relations with data provided
 def fill_relations(mydb, df):
+    indexArray = []
+    arrayCount = 0
+    while arrayCount < (df.shape[0]/2):
+        indexArray.append(arrayCount)
+        arrayCount += 1
+
+    # print("index: %s" % indexArray)
+
     # setting up all data frames for data parsing/extraction
     genreColumns = ['movieID', 'genreID', 'genreName']
-    genreDF = pd.DataFrame(columns=genreColumns)
+    genreDF = pd.DataFrame(index=indexArray, columns=genreColumns)
 
     keywordColumns = ['movieID', 'keywordID', 'keywordName']
-    keywordDF = pd.DataFrame(columns=keywordColumns)
+    keywordDF = pd.DataFrame(index=indexArray, columns=keywordColumns)
 
     prodCompaniesColumns = ['movieID', 'prodCompanyID', 'prodCompanyName']
-    prodCompaniesDF = pd.DataFrame(columns=prodCompaniesColumns)
+    prodCompaniesDF = pd.DataFrame(index=indexArray, columns=prodCompaniesColumns)
 
     prodCountriesColumns = ['movieID', 'prodCountryID', 'prodCountryName']
-    prodCountriesDF = pd.DataFrame(columns=prodCountriesColumns)
+    prodCountriesDF = pd.DataFrame(index=indexArray, columns=prodCountriesColumns)
 
     spokenLangColumns = ['movieID', 'spokenLangID', 'spokenLangName']
-    spokenLangDF = pd.DataFrame(columns=spokenLangColumns)
+    spokenLangDF = pd.DataFrame(index=indexArray, columns=spokenLangColumns)
 
-    dfArray = []
-    dfArray.append(genreDF)
-    dfArray.append(keywordDF)
-    dfArray.append(prodCompaniesDF)
-    dfArray.append(prodCountriesDF)
-    dfArray.append(spokenLangDF)
-
-    # get_data(df, genreDF, 'genres')
-    get_data(df, genreDF, 'keywords')
-    # get_data(df, genreDF, 'production_companies')
-    # get_data(df, genreDF, 'production_countries')
-    # get_data(df, genreDF, 'spoken_languages')
+    get_data(df, genreDF, 'genres')
+    get_data(df, keywordDF, 'keywords')
+    get_data(df, prodCompaniesDF, 'production_companies')
+    get_data(df, prodCountriesDF, 'production_countries')
+    get_data(df, spokenLangDF, 'spoken_languages')
+    # print(genreDF)
 
     # print(df['genres'].iloc[0])
     sqlFormula = "INSERT INTO Genre ( id, name) VALUES ( %s, %s)"
@@ -78,12 +81,20 @@ def fill_relations(mydb, df):
     return
 
 
+''' dfArray = []
+    dfArray.append(genreDF)
+    dfArray.append(keywordDF)
+    dfArray.append(prodCompaniesDF)
+    dfArray.append(prodCountriesDF)
+    dfArray.append(spokenLangDF)'''
+
+
 # parses/extracts data of a specific attribute, "attr", of the DataFrame "df"
 def get_data(df, newDF, attr):
     # get column names of data frame being inserted into
     colOneName = newDF.columns[1]
     colTwoName = newDF.columns[2]
-
+    count = 0  # used to keep track of indexes when adding data to newDF
     i = 0
     while i < df.shape[0]:
 
@@ -97,41 +108,47 @@ def get_data(df, newDF, attr):
         # get data from row i
         randData = df[attr].iloc[i]
 
-        # remove all chars in '(){}<>,":[]' from the rows data to help with parsing
-        # randData = ''.join(c for c in randData if c not in '(){}<>,":[]')
+        # remove all chars in '(){}<>":[]' from the rows data to help with parsing
         randData = ''.join(c for c in randData if c not in '{}[]<>":')
         randData = randData.replace("id", "")
         randData = randData.replace("name", "")
-        # randData = randData.replace(" ", "")
+        randData = randData.replace("iso_3166_1", "")
+        randData = randData.replace("iso_639_1", "")
+
         # print("randData: %s\n" % randData)
         randLength = len(randData)
-        # print(newDF.columns[0])
-        commaCount = 0
 
+        commaCount = 0
         j = 1
         # while j is less than length of row
-        count = 0
+
         while j < randLength:
-
-            # print(count)
-            count += 1
-
             # if char is a space then we have reached end of word then set id attribute in newDF
             if randData[j] == "," and (commaCount % 2) == 1:
-                newDF[colOneName] = randDataId
+                print("randDataId: %s\n" % randDataId)
+                # newDF.iloc[j, newDF.columns.get_loc(colOneName)] = randDataId
+                newDF[colOneName].iloc[j] = randDataId
+                # print("breaking\n")
                 commaCount += 1
                 randDataId = ""  # used to store id attribute from data row i
                 evenOddFlag = 0
                 j += 1
-                # print("breaking\n")
+                count += 1
 
             # if char is a space then we have reached end of word then set name attribute in newDF
             elif randData[j] == "," and (commaCount % 2) == 0:
-                newDF[colTwoName] = randDataName
+
+                if not randDataName.isspace() and randDataName != "":
+                    print("randDataName: %s\n" % randDataName)
+                    # newDF.iloc[j, newDF.columns.get_loc(colTwoName)] = randDataName
+                    newDF[colTwoName].iloc[j] = randDataName
                 commaCount += 1
-                randDataName = ""  # used to store name attribute from data row i
+
                 evenOddFlag = 1
                 j += 1
+                count += 1
+
+                randDataName = ""  # used to store name attribute from data row i
                 # print("breaking\n")
 
             # if char is first space reached in row its id attributes data
@@ -146,14 +163,18 @@ def get_data(df, newDF, attr):
                     randDataName += randData[j]
 
 
-
-
             j += 1
 
-        print("randDataId: %s\nrandDataName: %s\n" % (randDataId, randDataName))
+        # print("randDataId: %s\nrandDataName: %s\n" % (randDataId, randDataName))
+        # print(newDF.iloc[i])
         i += 1
-
+    return newDF
     # print("i: %d\n" % i)
 
 
-create_relations()
+def main():
+    create_relations()
+
+
+if __name__ == "__main__":
+    main()
