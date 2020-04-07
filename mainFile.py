@@ -66,8 +66,8 @@ def fill_relations(mydb, df):
     dfArray.append(prodCountriesDF)
     dfArray.append(spokenLangDF)
 
-    get_data(df, genreDF, 'genres')
-    # get_data(df, genreDF, 'keywords')
+    # get_data(df, genreDF, 'genres')
+    get_data(df, genreDF, 'keywords')
     # get_data(df, genreDF, 'production_companies')
     # get_data(df, genreDF, 'production_countries')
     # get_data(df, genreDF, 'spoken_languages')
@@ -103,7 +103,7 @@ def get_data(df, newDF, attr):
         randData = randData.replace("id", "")
         randData = randData.replace("name", "")
         # randData = randData.replace(" ", "")
-        print("randData: %s\n" % randData)
+        # print("randData: %s\n" % randData)
         randLength = len(randData)
         # print(newDF.columns[0])
         commaCount = 0
@@ -122,7 +122,7 @@ def get_data(df, newDF, attr):
                 commaCount += 1
                 randDataId = ""  # used to store id attribute from data row i
                 evenOddFlag = 0
-
+                j += 1
                 # print("breaking\n")
 
             # if char is a space then we have reached end of word then set name attribute in newDF
@@ -131,11 +131,11 @@ def get_data(df, newDF, attr):
                 commaCount += 1
                 randDataName = ""  # used to store name attribute from data row i
                 evenOddFlag = 1
-
+                j += 1
                 # print("breaking\n")
 
             # if char is first space reached in row its id attributes data
-            elif randData[j] != "," and randData[j] != " ":
+            elif randData[j] != ",":
 
                 # we know characters are now id data
                 if evenOddFlag == 0:
@@ -144,6 +144,8 @@ def get_data(df, newDF, attr):
                 # we know characters are now name data
                 if evenOddFlag == 1:
                     randDataName += randData[j]
+
+
 
 
             j += 1
