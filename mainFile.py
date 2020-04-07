@@ -46,11 +46,9 @@ def create_relations():
 def fill_relations(mydb, df):
     indexArray = []
     arrayCount = 0
-    while arrayCount < (df.shape[0]/2):
+    while arrayCount < (df.shape[0]):
         indexArray.append(arrayCount)
         arrayCount += 1
-
-    # print("index: %s" % indexArray)
 
     # setting up all data frames for data parsing/extraction
     genreColumns = ['movieID', 'genreID', 'genreName']
@@ -73,9 +71,20 @@ def fill_relations(mydb, df):
     get_data(df, prodCompaniesDF, 'production_companies')
     get_data(df, prodCountriesDF, 'production_countries')
     get_data(df, spokenLangDF, 'spoken_languages')
-    # print(genreDF)
 
-    # print(df['genres'].iloc[0])
+    genreDF.dropna(how='all', inplace=True)
+    keywordDF.dropna(how='all', inplace=True)
+    prodCompaniesDF.dropna(how='all', inplace=True)
+    prodCountriesDF.dropna(how='all', inplace=True)
+    spokenLangDF.dropna(how='all', inplace=True)
+    # newDF.dropna(subset=['movieID', colOneName, colTwoName])
+
+    print(genreDF)
+    print(keywordDF)
+    print(prodCompaniesDF)
+    print(prodCountriesDF)
+    print(spokenLangDF)
+
     sqlFormula = "INSERT INTO Genre ( id, name) VALUES ( %s, %s)"
 
     return
@@ -122,37 +131,31 @@ def get_data(df, newDF, attr):
         j = 1
         # while j is less than length of row
 
-        while j < randLength:
+        while j < randLength and count < (df.shape[0] - 1):
             # if char is a space then we have reached end of word then set id attribute in newDF
             if randData[j] == "," and (commaCount % 2) == 1:
-                print("randDataId: %s\n" % randDataId)
-                # newDF.iloc[j, newDF.columns.get_loc(colOneName)] = randDataId
-                newDF[colOneName].iloc[j] = randDataId
-                # print("breaking\n")
+                # print("id: %s\n" % randDataId)
+                newDF[colOneName].iloc[count] = randDataId
                 commaCount += 1
                 randDataId = ""  # used to store id attribute from data row i
                 evenOddFlag = 0
                 j += 1
-                count += 1
 
             # if char is a space then we have reached end of word then set name attribute in newDF
             elif randData[j] == "," and (commaCount % 2) == 0:
 
                 if not randDataName.isspace() and randDataName != "":
-                    print("randDataName: %s\n" % randDataName)
-                    # newDF.iloc[j, newDF.columns.get_loc(colTwoName)] = randDataName
-                    newDF[colTwoName].iloc[j] = randDataName
+                    # print("name: %s\n" % randDataName)
+                    newDF[colTwoName].iloc[count] = randDataName
                 commaCount += 1
-
+                count += 1
                 evenOddFlag = 1
                 j += 1
-                count += 1
 
                 randDataName = ""  # used to store name attribute from data row i
-                # print("breaking\n")
 
             # if char is first space reached in row its id attributes data
-            elif randData[j] != ",":
+            elif randData[j] != "," and randData != " ":
 
                 # we know characters are now id data
                 if evenOddFlag == 0:
@@ -162,13 +165,14 @@ def get_data(df, newDF, attr):
                 if evenOddFlag == 1:
                     randDataName += randData[j]
 
-
             j += 1
 
         # print("randDataId: %s\nrandDataName: %s\n" % (randDataId, randDataName))
-        # print(newDF.iloc[i])
+
         i += 1
-    return newDF
+    # dat.dropna(subset=[col_list])
+    #newDF.dropna(subset=['movieID', colOneName, colTwoName])
+    return
     # print("i: %d\n" % i)
 
 
