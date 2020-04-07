@@ -80,6 +80,10 @@ def fill_relations(mydb, df):
 
 # parses/extracts data of a specific attribute, "attr", of the DataFrame "df"
 def get_data(df, newDF, attr):
+    # get column names of data frame being inserted into
+    colOneName = newDF.columns[1]
+    colTwoName = newDF.columns[2]
+
     i = 0
     while i < df.shape[0]:
 
@@ -94,39 +98,53 @@ def get_data(df, newDF, attr):
         randData = df[attr].iloc[i]
 
         # remove all chars in '(){}<>,":[]' from the rows data to help with parsing
-        randData = ''.join(c for c in randData if c not in '(){}<>,":[]')
-
+        # randData = ''.join(c for c in randData if c not in '(){}<>,":[]')
+        randData = ''.join(c for c in randData if c not in '{}[]<>":')
+        randData = randData.replace("id", "")
+        randData = randData.replace("name", "")
+        # randData = randData.replace(" ", "")
         print("randData: %s\n" % randData)
         randLength = len(randData)
         # print(newDF.columns[0])
         spaceCount = 0
 
-        j = 0
+        j = 1
         # while j is less than length of row
+        count = 0
         while j < randLength:
-            colOneName = newDF.columns[1]
-            colTwoName = newDF.columns[2]
+
+            # print(count)
+            count += 1
+
             # if char is a space then we have reached end of word then set id attribute in newDF
-            if randData[j] == " " and spaceCount == 0:
+            if randData[j] == "," and (spaceCount % 2) == 1:
                 newDF[colOneName] = randDataId
                 spaceCount += 1
-                return
+                randDataId = ""  # used to store id attribute from data row i
+                evenOddFlag = 1
+
                 # print("breaking\n")
 
             # if char is a space then we have reached end of word then set name attribute in newDF
-            elif randData[j] == " " and spaceCount == 1:
+            elif randData[j] == "," and (spaceCount % 2) == 0:
                 newDF[colTwoName] = randDataName
                 spaceCount += 1
+                randDataName = ""  # used to store name attribute from data row i
+                evenOddFlag = 0
+
                 # print("breaking\n")
 
             # if char is first space reached in row its id attributes data
-            elif randData[j] != " " and spaceCount == 0:
-                # print("char: %c\n" % randData[j])
-                randDataId += randData[j]
+            elif randData[j] != ",":
 
-            # if char is second space reached in row its name attributes data
-            elif randData[j] != " " and spaceCount == 1:
-                randDataName += randData[j]
+                # we know characters are now id data
+                if evenOddFlag == 0:
+                    randDataId += randData[j]
+
+                # we know characters are now name data
+                if evenOddFlag == 1:
+                    randDataName += randData[j]
+
 
             j += 1
 
