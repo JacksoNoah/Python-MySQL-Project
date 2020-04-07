@@ -121,7 +121,7 @@ def get_data(df, newDF, attr):
                 newDF[colOneName] = randDataId
                 spaceCount += 1
                 randDataId = ""  # used to store id attribute from data row i
-                evenOddFlag = 1
+                evenOddFlag = 0
 
                 # print("breaking\n")
 
@@ -130,12 +130,12 @@ def get_data(df, newDF, attr):
                 newDF[colTwoName] = randDataName
                 spaceCount += 1
                 randDataName = ""  # used to store name attribute from data row i
-                evenOddFlag = 0
+                evenOddFlag = 1
 
                 # print("breaking\n")
 
             # if char is first space reached in row its id attributes data
-            elif randData[j] != ",":
+            elif randData[j] != "," and randData[j] != " ":
 
                 # we know characters are now id data
                 if evenOddFlag == 0:
