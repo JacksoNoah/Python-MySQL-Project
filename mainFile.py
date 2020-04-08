@@ -96,21 +96,18 @@ def fill_relations(mydb, df):
     return
 
 
-
-
 # parses/extracts data of a specific attribute, "attr", of the DataFrame "df"
 def get_data(df, newDF, attr, movieIds):
     # get column names of data frame being inserted into
     colOneName = newDF.columns[1]
     colTwoName = newDF.columns[2]
+
     count = 0  # used to keep track of indexes when adding data to newDF
+
     i = 0
     while i < df.shape[0]:
 
-        evenOddFlag = 0  # is 0 when char is odd numbered space, and 1 when char is even space in row
-        dataFlag = 0  # if 1 then data element is id, or newDF.columns[1], if 2 then newDF.columns[2]
         commaCount = 0  # keep track of which space
-
         randDataName = ""  # used to store name attribute from data row i
         randDataId = ""  # used to store id attribute from data row i
 
@@ -128,30 +125,30 @@ def get_data(df, newDF, attr, movieIds):
         randLength = len(randData)
 
         commaCount = 0
-        j = 1
+        j = 0
         # while j is less than length of row
 
         while j < randLength and count < (df.shape[0] - 1):
-            # if char is a space then we have reached end of word then set id attribute in newDF
+
+            # char is comma, and comma count is odd, set id attribute in newDF
             if randData[j] == "," and (commaCount % 2) == 1:
-                # print("id: %s\n" % randDataId)
+                # set row values of id column, and movieID column
                 newDF['movieID'].iloc[count] = movieIds[count]
                 newDF[colOneName].iloc[count] = randDataId
                 commaCount += 1
-                randDataId = ""  # used to store id attribute from data row i
-                evenOddFlag = 0
+                randDataId = ""
                 j += 1
 
             # if char is a space then we have reached end of word then set name attribute in newDF
             elif randData[j] == "," and (commaCount % 2) == 0:
-
+                # making sure randDataName isnt just space characters
                 if not randDataName.isspace() and randDataName != "":
+                    # set row values of name column, and movieID column
                     newDF['movieID'].iloc[count] = movieIds[count]
-                    # print("name: %s\n" % randDataName)
                     newDF[colTwoName].iloc[count] = randDataName
+
                 commaCount += 1
                 count += 1
-                evenOddFlag = 1
                 j += 1
 
                 randDataName = ""  # used to store name attribute from data row i
@@ -160,22 +157,17 @@ def get_data(df, newDF, attr, movieIds):
             elif randData[j] != "," and randData != " ":
 
                 # we know characters are now id data
-                if evenOddFlag == 0:
+                if (commaCount % 2) == 0:
                     randDataId += randData[j]
 
                 # we know characters are now name data
-                if evenOddFlag == 1:
+                if (commaCount % 2) == 1:
                     randDataName += randData[j]
 
             j += 1
 
-        # print("randDataId: %s\nrandDataName: %s\n" % (randDataId, randDataName))
-
         i += 1
-    # dat.dropna(subset=[col_list])
-    #newDF.dropna(subset=['movieID', colOneName, colTwoName])
     return
-    # print("i: %d\n" % i)
 
 
 def main():
