@@ -24,26 +24,30 @@ def create_relations():
 
     # print(df.columns.values)     # example how to print column names
 
-    my_cursor = mydb.cursor()
+    my_cursor = mydb.cursor(buffered=True)
 
     # creating relations inside of mySQL workbench
     # my_cursor.execute("CREATE DATABASE Homework5")
-    # my_cursor.execute("SHOW DATABASES")
-    # my_cursor.execute("SHOW TABLES")
-    # my_cursor.execute("CREATE TABLE Genre (id INTEGER(10), name VARCHAR(255))")
-    # my_cursor.execute("CREATE TABLE Keyword (id INTEGER(10), name VARCHAR(255))")
-    # my_cursor.execute("CREATE TABLE Production_Companies (id INTEGER(10), name VARCHAR(255))")
+    my_cursor.execute("SHOW DATABASES")
+    # my_cursor.execute("CREATE TABLE Genre (id INTEGER(10) PRIMARY KEY, name VARCHAR(255))")
+    # my_cursor.execute("SHOW TABLES") my_cursor.execute("CREATE TABLE GenreRelationship (id INT AUTO_INCREMENT
+    # PRIMARY KEY, name VARCHAR(255), genre_id INTEGER(10))")
+    #
+    # my_cursor.execute("CREATE TABLE Keyword (id INTEGER(
+    # 10), name VARCHAR(255))") my_cursor.execute("CREATE TABLE Production_Companies (id INTEGER(10), name VARCHAR(
+    # 255))")
+
     # my_cursor.execute("CREATE TABLE Production_Countries (iso_3166_1 VARCHAR(255), name VARCHAR(255))")
     # my_cursor.execute("CREATE TABLE Spoken_Languages (iso_369_1 VARCHAR(255), name VARCHAR(255))")
     # my_cursor.execute("CREATE TABLE Spoken_Languages (iso_369_1 VARCHAR(255), name VARCHAR(255))")
 
-    fill_relations(mydb, df)
+    fill_relations(mydb, my_cursor, df)
 
     return
 
 
 # Fills relations with data provided
-def fill_relations(mydb, df):
+def fill_relations(mydb, my_cursor, df):
     indexArray = []
     arrayCount = 0
     while arrayCount < (df.shape[0]):
@@ -66,18 +70,13 @@ def fill_relations(mydb, df):
     spokenLangColumns = ['movieID', 'spokenLangID', 'spokenLangName']
     spokenLangDF = pd.DataFrame(index=indexArray, columns=spokenLangColumns)
 
-    dfArray = []
-    dfArray.append(genreDF)
-    dfArray.append(keywordDF)
-    dfArray.append(prodCompaniesDF)
-    dfArray.append(prodCountriesDF)
-    dfArray.append(spokenLangDF)
+    dfArray = [genreDF, keywordDF, prodCompaniesDF, prodCountriesDF, spokenLangDF]
 
     get_data(df, genreDF, 'genres', df['id'])
-    get_data(df, keywordDF, 'keywords', df['id'])
-    get_data(df, prodCompaniesDF, 'production_companies', df['id'])
-    get_data(df, prodCountriesDF, 'production_countries', df['id'])
-    get_data(df, spokenLangDF, 'spoken_languages', df['id'])
+    # get_data(df, keywordDF, 'keywords', df['id'])
+    # get_data(df, prodCompaniesDF, 'production_companies', df['id'])
+    #  get_data(df, prodCountriesDF, 'production_countries', df['id'])
+    #  get_data(df, spokenLangDF, 'spoken_languages', df['id'])
 
     genreDF.dropna(how='all', inplace=True)
     keywordDF.dropna(how='all', inplace=True)
@@ -85,13 +84,28 @@ def fill_relations(mydb, df):
     prodCountriesDF.dropna(how='all', inplace=True)
     spokenLangDF.dropna(how='all', inplace=True)
 
-    print(genreDF)
-    print(keywordDF)
-    print(prodCompaniesDF)
-    print(prodCountriesDF)
-    print(spokenLangDF)
+    i = 0
 
+    print(genreDF.genreID.unique()[0])
+    print(genreDF.genreName.unique()[0])
+    genreUniqLen = len(genreDF.genreName.unique())
+    # print(genreDF)
+    # print(keywordDF)
+    # print(prodCompaniesDF)
+    # print(prodCountriesDF)
+    # print(spokenLangDF)
     sqlFormula = "INSERT INTO Genre ( id, name) VALUES ( %s, %s)"
+    # genreDF.to_sql(con=mydb, name='Genre', if_exists='replace')
+    i = 0
+    while i < genreUniqLen:
+        # genreTuple = (genreDF['genreID'].iloc[i], genreDF['genreName'].iloc[i])
+        genreTuple = (genreDF.genreID.unique()[i], genreDF.genreName.unique()[i])
+        my_cursor.execute(sqlFormula, genreTuple)
+        i += 1
+
+    mydb.commit()
+    # inserting into Genre relation, which holds genre id and genre name
+    mydb.close()
 
     return
 
