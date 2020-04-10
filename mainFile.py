@@ -29,19 +29,18 @@ def create_relations():
     # creating relations inside of mySQL workbench
     # my_cursor.execute("CREATE DATABASE Homework5")
     my_cursor.execute("SHOW DATABASES")
-    # my_cursor.execute("CREATE TABLE GenreRelationship (id INTEGER(10) AUTO_INCREMENT PRIMARY KEY, genreID Integer(10), " "name VARCHAR(255))")
-    my_cursor.execute("CREATE TABLE GenreRelationship (id INTEGER AUTO_INCREMENT PRIMARY KEY , genreID Integer(10), " "genreName VARCHAR(255))")
-
     # my_cursor.execute("CREATE TABLE Genre (id INTEGER(10) PRIMARY KEY, name VARCHAR(255))")
-    # my_cursor.execute("SHOW TABLES") my_cursor.execute("CREATE TABLE GenreRelationship (id INT AUTO_INCREMENT
-    # PRIMARY KEY, name VARCHAR(255), genre_id INTEGER(10))")
-    #
-    # my_cursor.execute("CREATE TABLE Keyword (id INTEGER(
-    # 10), name VARCHAR(255))") my_cursor.execute("CREATE TABLE Production_Companies (id INTEGER(10), name VARCHAR(
-    # 255))")
+    # my_cursor.execute("CREATE TABLE GenreRelationship (id INTEGER AUTO_INCREMENT PRIMARY KEY , genreID Integer(10), genreName VARCHAR(255))")
+
+    # my_cursor.execute("SHOW TABLES")
+
+    my_cursor.execute("CREATE TABLE Keyword (id INTEGER(10) PRIMARY KEY, name VARCHAR(255))")
+    my_cursor.execute("CREATE TABLE KeywordRelationship (id INTEGER AUTO_INCREMENT PRIMARY KEY , keywordID Integer(10), keywordName VARCHAR(255))")
+
+    # my_cursor.execute("CREATE TABLE Production_Companies (id INTEGER(10), name VARCHAR( 255))")
 
     # my_cursor.execute("CREATE TABLE Production_Countries (iso_3166_1 VARCHAR(255), name VARCHAR(255))")
-    # my_cursor.execute("CREATE TABLE Spoken_Languages (iso_369_1 VARCHAR(255), name VARCHAR(255))")
+
     # my_cursor.execute("CREATE TABLE Spoken_Languages (iso_369_1 VARCHAR(255), name VARCHAR(255))")
 
     fill_relations(mydb, my_cursor, df)
@@ -76,7 +75,7 @@ def fill_relations(mydb, my_cursor, df):
     dfArray = [genreDF, keywordDF, prodCompaniesDF, prodCountriesDF, spokenLangDF]
 
     get_data(df, genreDF, 'genres', df['id'])
-    # get_data(df, keywordDF, 'keywords', df['id'])
+    get_data(df, keywordDF, 'keywords', df['id'])
     # get_data(df, prodCompaniesDF, 'production_companies', df['id'])
     #  get_data(df, prodCountriesDF, 'production_countries', df['id'])
     #  get_data(df, spokenLangDF, 'spoken_languages', df['id'])
@@ -94,9 +93,17 @@ def fill_relations(mydb, my_cursor, df):
     # print(prodCompaniesDF)
     # print(prodCountriesDF)
     # print(spokenLangDF)
-    tableName = "GenreRelationship"
 
-    # adding genre data to mysql
+    '''# inserting data into Genre relation in mysql
+    genreUniqLen = len(genreDF.genreName.unique())
+    sqlFormulaGenre = "INSERT INTO Genre ( id, name) VALUES ( %s, %s)"
+    i = 0
+    while i < genreUniqLen:
+        genreTuple = (genreDF.genreID.unique()[i], genreDF.genreName.unique()[i])
+        my_cursor.execute(sqlFormulaGenre, genreTuple)
+        i += 1
+
+    # adding data into GenreRelation table in mysql
     sqlFormulaGenreRel = "INSERT INTO GenreRelationship (id, genreID, genreName) VALUES ( %s, %s, %s)"
     i = 1
     while i < genreDF.shape[0]:
@@ -104,16 +111,22 @@ def fill_relations(mydb, my_cursor, df):
         my_cursor.execute(sqlFormulaGenreRel, genreTuple)
         i += 1
 
-    ''' genreUniqLen = len(genreDF.genreName.unique())
-    sqlFormulaGenre = "INSERT INTO Genre ( id, name) VALUES ( %s, %s)"
-    # genreDF.to_sql(con=mydb, name='Genre', if_exists='replace')
+    # inserting data into Keyword relation
+    sqlFormulaKeyword = "INSERT INTO Keyword ( id, name) VALUES ( %s, %s)"
+    keywordUniqLen = len(keywordDF.keywordName.unique())
     i = 0
-    while i < genreUniqLen:
-        genreTuple = (genreDF.genreID.unique()[i], genreDF.genreName.unique()[i])
-        my_cursor.execute(sqlFormulaGenre, genreTuple)
+    while i < keywordUniqLen:
+        genreTuple = (keywordDF.keywordID.unique()[i], keywordDF.keywordName.unique()[i])
+        my_cursor.execute(sqlFormulaKeyword, genreTuple)
         i += 1
-    '''
 
+    # adding data into KeywordRelation table in mysql
+    sqlFormulaGenreRel = "INSERT INTO KeywordRelationship (id, keywordID, keywordName) VALUES ( %s, %s, %s)"
+    i = 1
+    while i < keywordDF.shape[0]:
+        genreTuple = (i, keywordDF.keywordID.iloc[i], keywordDF.keywordName.iloc[i])
+        my_cursor.execute(sqlFormulaGenreRel, genreTuple)
+        i += 1'''
 
     mydb.commit()
     # inserting into Genre relation, which holds genre id and genre name
